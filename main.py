@@ -6,8 +6,8 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.enums.parse_mode import ParseMode
 from dotenv import load_dotenv
 
-from handlers import router, start_register, register_block
-from states import RegisterState
+from handlers import router, start_register, register_block, announce
+from states import RegisterState, AnnounceState
 
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
@@ -15,9 +15,12 @@ TOKEN_BOT = os.getenv("TOKEN_BOT")
 bot = Bot(token=TOKEN_BOT, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
 
-""" Регистрируем хендлер регистрации"""
+""" Регистрируем хендлер регистрации """
 dp.message.register(start_register, F.text=='Зарегистрироваться')
-dp.message.register(register_block, RegisterState.regBlock)
+dp.message.register(register_block, RegisterState.reg_block)
+
+""" Регистрируем хендлер уведомления """
+dp.message.register(announce, AnnounceState.announce)
 
 async def main():
     """ Главная функция, запускающая обработку бота """

@@ -1,31 +1,62 @@
-import sqlite3
+import os
+
+import mysql.connector
+from dotenv import load_dotenv
+
+load_dotenv()
+DATABASE_HOST = os.getenv("DATABASE_HOST")
+DATABASE_USER = os.getenv("DATABASE_USER")
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 
 class Database():
-    def __init__(self, db_name):
-        self.connection = sqlite3.connect(db_name)
-        self.cursor = self.connection.cursor()
-        self.create_db()
+    """ Класс для взаимодействия с базой данных """
 
-    def create_db(self):
+    def __init__(self, db_name):
+        """ Подключаемся к базе данных """
+        self.db = mysql.connector.connect(host=DATABASE_HOST, user=DATABASE_USER, password=DATABASE_PASSWORD, database=db_name)
+        self.cursor = self.db.cursor()
+        self.create_table()
+
+    def create_table(self):
+        """ Создаем таблицу users """
         try:
             query = ("CREATE TABLE IF NOT EXISTS users("
-                     "id INTEGER PRIMARY KEY,"
+                     "id INT AUTO_INCREMENT PRIMARY KEY,"
                      "user_block TEXT,"
-                     "telegram_id TEXT);")
+                     "telegram_id TEXT,"
+                     "role TEXT);")
             self.cursor.execute(query)
-            self.connection.commit()
-        except sqlite3.Error as Error:
+            self.db.commit()
+        except mysql.connector.Error as Error:
             print("Ошибка при создании: ", Error)
 
     def add_user(self, user_block, telegram_id):
-        self.cursor.execute(f'INSERT INTO users (user_block,telegram_id) VALUES (?,?)', (user_block, telegram_id))
-        self.connection.commit()
+        """ Добавить пользователя в базу данных """
+        self.cursor.execute("INSERT INTO users (user_block, telegram_id, role) VALUES (%s, %s, %s)", (user_block, telegram_id, "user"))
+        self.db.commit()
+    
+    def get_all_users(self):
+        """ Получить всех пользователей бд """
+        self.cursor.execute("SELECT * FROM users")
+        users = self.cursor.fetchall()
+        return users
 
     def select_user_id(self, telegram_id):
-        users = self.cursor.execute("SELECT * FROM users WHERE telegram_id = ?", (telegram_id, ))
-        return users.fetchone()
+        """ Получам данные пользователя """
+        self.cursor.execute("SELECT * FROM users WHERE telegram_id = %s", (telegram_id, ))
+        user = self.cursor.fetchone()
+        return user
+    
+    def is_user_admin(self, telegram_id):
+        """ Проверят, админ ли пользователь по его telegram_id """
+        self.cursor.execute("SELECT * FROM users WHERE telegram_id = %s", (telegram_id, ))
+        user = self.cursor.fetchone()
+        if user[-1] == "admin":
+            return user
+        else:
+            return False
 
     def __del__(self):
+        """ Закрываем подключение к бд """
         self.cursor.close()
-        self.connection.close()
-
+        self.db.close()

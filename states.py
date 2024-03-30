@@ -1,4 +1,10 @@
 from aiogram.fsm.state import StatesGroup, State
 
 class RegisterState(StatesGroup):
-    regBlock = State()
+    """ Состояние регистрации """
+    reg_block = State()
+
+
+class AnnounceState(StatesGroup):
+    """ Состояние уведомления """
+    announce = State()
