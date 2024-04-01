@@ -11,6 +11,6 @@ def validate_block(block: str):
     if block[-1] not in "АБВГ":
         return False
 
-    if block[0].isdecimal() and block[1].isdecimal() and block[2].isdecimal() and block[-1].isalpha() and 200 < int(block[0:-1]) < 950: # Проверка на самый максимальный блок
+    if block[0].isdecimal() and block[1].isdecimal() and block[2].isdecimal() and block[-1].isalpha() and 200 < int(block[0:-1]) < 941: # Проверка на самый максимальный блок
         return block
     return False
