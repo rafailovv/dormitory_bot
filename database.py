@@ -30,9 +30,9 @@ class Database():
         except mysql.connector.Error as Error:
             print("Ошибка при создании: ", Error)
 
-    def add_user(self, user_block, telegram_id):
+    def add_user(self, user_block, telegram_id, has_car):
         """ Добавить пользователя в базу данных """
-        self.cursor.execute("INSERT INTO users (user_block, telegram_id, role) VALUES (%s, %s, %s)", (user_block, telegram_id, "user"))
+        self.cursor.execute("INSERT INTO users (user_block, telegram_id, car, role) VALUES (%s, %s, %s, %s)", (user_block, telegram_id, bool(has_car), "user"))
         self.db.commit()
     
     def get_all_users(self):
@@ -50,7 +50,7 @@ class Database():
     def is_user_admin(self, telegram_id):
         """ Проверят, админ ли пользователь по его telegram_id """
         self.cursor.execute("SELECT * FROM users WHERE telegram_id = %s", (telegram_id, ))
-        user = self.cursor.fetchone()
+        user = self.cursor.fetchone() # How we can get data in dictionary instead list
         if user[-1] == "admin":
             return user
         else:

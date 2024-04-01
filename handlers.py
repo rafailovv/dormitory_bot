@@ -1,13 +1,13 @@
 import os
 
-from aiogram import F, Router, Bot
+from aiogram import Router, Bot
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from dotenv import load_dotenv
 
-from keyboards import register_keyboard
+from keyboards import register_keyboard, yes_or_no_keyboard
 from states import RegisterState, AnnounceState
 from database import Database
 from utils import validate_block
@@ -23,7 +23,7 @@ async def start_command(message: Message):
     """ Команда /start """
     user_name = message.from_user.first_name
     start_message = (f'Здравствуйте, {user_name}. Бот успешно запущен и будет информировать'
-                        f' Вас о важных мероприятиях. Пожалуйста, не выключайте звук, чтобы не пропустить их)')
+                        f'Вас о важных мероприятиях. Пожалуйста, не выключайте звук, чтобы не пропустить их)')
     await message.answer(start_message, reply_markup=register_keyboard)
     await message.delete()
 
@@ -85,14 +85,25 @@ async def register_block(message: Message, state: FSMContext):
     block = validate_block(message.text)
     if block:
         await state.update_data(reg_block=block)
-        reg_data = await state.get_data()
-        reg_block = reg_data.get('reg_block')
-        msg = (f'Регистрация прошла успешно \n'
-            f'Ваш блок: {reg_block}')
-        await message.answer(msg)
-        db = Database(os.getenv('DATABASE_NAME'))
-        db.add_user(reg_block, message.from_user.id)
-        await state.clear()
+        await state.set_state(RegisterState.reg_has_car)
+        await message.answer("Отлично!\nУ вас есть машина?", reply_markup=yes_or_no_keyboard)
     else:
         await state.clear()
         await message.answer("Номер блока введен некорректно! Начните регистрацию заново.", reply_markup=register_keyboard)
+
+async def register_car_check(message: Message, state: FSMContext):
+    """ Регистрация машины при наличии """
+    if message.text.strip().lower() == "да":
+        # Enter car
+        await message.answer(f"Введите марку своей машины. (Функция в разработке, просим Вас пройти регистрацию заново и указать, что у вас нет машины)\n"
+                             f"Спасибо за понимание!")
+        await state.clear()
+    elif message.text.strip().lower() == "нет":
+        await state.update_data(reg_has_car=0)
+        reg_data = await state.get_data()
+        msg = (f'Регистрация прошла успешно\n'
+            f'Ваш блок: {reg_data['reg_block']}\n')
+        await message.answer(msg)
+        db = Database(os.getenv('DATABASE_NAME'))
+        db.add_user(reg_data["reg_block"], message.from_user.id, reg_data["reg_has_car"])
+        await state.clear()
