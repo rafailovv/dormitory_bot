@@ -1,5 +1,6 @@
 import os
 
+import json
 from aiogram import Router, Bot
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.filters import CommandStart, Command
@@ -10,7 +11,7 @@ from dotenv import load_dotenv
 from keyboards import register_keyboard, yes_or_no_keyboard
 from states import RegisterState, AnnounceState
 from database import Database
-from utils import validate_block
+from utils import validate_block, validate_car_mark, validate_car_number
 
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
@@ -76,7 +77,7 @@ async def start_register(message: Message, state: FSMContext):
         await message.answer("Вы уже зарегистрированы")
     else:
         await message.answer(f'Напишите свой блок \n'
-                                f'Формат блока: НомерБуква \n'
+                                f'Формат ввода: НомерБуква \n'
                                 f'Например: 617А')
         await state.set_state(RegisterState.reg_block)
 
@@ -95,15 +96,46 @@ async def register_car_check(message: Message, state: FSMContext):
     """ Регистрация машины при наличии """
     if message.text.strip().lower() == "да":
         # Enter car
-        await message.answer(f"Введите марку своей машины. (Функция в разработке, просим Вас пройти регистрацию заново и указать, что у вас нет машины)\n"
-                             f"Спасибо за понимание!")
-        await state.clear()
+        await state.update_data(reg_has_car=1)
+        await message.answer(f"Введите марку и номер своей машины в одну строку.)\n"
+                                f"Внимание, будь очень внимательны, проверь все ли ввели правильно!\n"
+                                f"При вводе номера испольйте только английские символы и цифры. Будьте очень внимательны!\n"
+                                f"Формат ввода: Марка Номер\n"
+                                f"Например: Lamborghini A012AA\n")
+        await state.set_state(RegisterState.reg_car_data)
     elif message.text.strip().lower() == "нет":
         await state.update_data(reg_has_car=0)
         reg_data = await state.get_data()
         msg = (f'Регистрация прошла успешно\n'
-            f'Ваш блок: {reg_data['reg_block']}\n')
+                f'Ваш блок: {reg_data['reg_block']}\n')
         await message.answer(msg)
         db = Database(os.getenv('DATABASE_NAME'))
         db.add_user(reg_data["reg_block"], message.from_user.id, reg_data["reg_has_car"])
         await state.clear()
+
+async def register_car_data(message: Message, state: FSMContext):
+    """ Регистрирует марку и номер машины """
+    car_data = message.text.split()
+
+    if len(car_data) > 2:
+        car_data = [" ".join(car_data[:-1]), car_data[-1]]
+
+    car_mark, car_number = car_data[0], car_data[1]
+
+    cars_marks_base = None
+    with open('./data/cars.json', 'r') as file:
+        cars_marks_base = json.load(file)
+
+    if validate_car_mark(car_mark, cars_marks_base) and validate_car_number(car_number):
+        await state.update_data(reg_has_car=1, reg_car_data=[car_mark, car_number])
+        reg_data = await state.get_data()
+        msg = (f"Регистрация прошла успешно\n"
+                f"Ваш блок: {reg_data['reg_block']}\n"
+                f"Ваша машина: {reg_data['reg_car_data'][0]} {reg_data['reg_car_data'][1]}")
+        await message.answer(msg)
+
+        # Create database adding
+        await state.clear()
+    else:
+        await state.clear()
+        await message.answer("Данные введенны некорректно! Начните регистрацию заново.", reply_markup=register_keyboard)

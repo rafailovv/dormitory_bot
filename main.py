@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.enums.parse_mode import ParseMode
 from dotenv import load_dotenv
 
-from handlers import router, start_register, register_block, register_car_check, announce
+from handlers import router, start_register, register_block, register_car_check, register_car_data, announce
 from states import RegisterState, AnnounceState
 
 load_dotenv()
@@ -19,6 +19,7 @@ dp = Dispatcher()
 dp.message.register(start_register, F.text=='Зарегистрироваться')
 dp.message.register(register_block, RegisterState.reg_block)
 dp.message.register(register_car_check, RegisterState.reg_has_car)
+dp.message.register(register_car_data, RegisterState.reg_car_data)
 
 """ Регистрируем хендлер уведомления """
 dp.message.register(announce, AnnounceState.announce)
