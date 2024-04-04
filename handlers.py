@@ -96,7 +96,7 @@ async def register_car_check(message: Message, state: FSMContext):
     """ Регистрация машины при наличии """
     if message.text.strip().lower() == "да":
         # Enter car
-        await state.update_data(reg_has_car=1)
+        await state.update_data(reg_has_car=True)
         await message.answer(f"Введите марку и номер своей машины в одну строку.)\n"
                                 f"Внимание, будь очень внимательны, проверь все ли ввели правильно!\n"
                                 f"При вводе номера испольйте только английские символы и цифры. Будьте очень внимательны!\n"
@@ -104,13 +104,14 @@ async def register_car_check(message: Message, state: FSMContext):
                                 f"Например: Lamborghini A012AA\n")
         await state.set_state(RegisterState.reg_car_data)
     elif message.text.strip().lower() == "нет":
-        await state.update_data(reg_has_car=0)
+        await state.update_data(reg_has_car=False)
         reg_data = await state.get_data()
         msg = (f'Регистрация прошла успешно\n'
                 f'Ваш блок: {reg_data['reg_block']}\n')
         await message.answer(msg)
+        
         db = Database(os.getenv('DATABASE_NAME'))
-        db.add_user(reg_data["reg_block"], message.from_user.id, reg_data["reg_has_car"])
+        db.add_user(reg_data["reg_block"], int(message.from_user.id), reg_data["reg_has_car"])
         await state.clear()
 
 async def register_car_data(message: Message, state: FSMContext):
@@ -123,18 +124,19 @@ async def register_car_data(message: Message, state: FSMContext):
     car_mark, car_number = car_data[0], car_data[1]
 
     cars_marks_base = None
-    with open('./data/cars.json', 'r') as file:
-        cars_marks_base = json.load(file)
+    with open('./data/cars.json', 'r', encoding="utf-8") as file:
+        cars_marks_base = json.load(file,)
 
     if validate_car_mark(car_mark, cars_marks_base) and validate_car_number(car_number):
-        await state.update_data(reg_has_car=1, reg_car_data=[car_mark, car_number])
+        await state.update_data(reg_has_car=True, reg_car_data=[car_mark, car_number])
         reg_data = await state.get_data()
         msg = (f"Регистрация прошла успешно\n"
                 f"Ваш блок: {reg_data['reg_block']}\n"
                 f"Ваша машина: {reg_data['reg_car_data'][0]} {reg_data['reg_car_data'][1]}")
         await message.answer(msg)
 
-        # Create database adding
+        db = Database(os.getenv('DATABASE_NAME'))
+        db.add_user(reg_data["reg_block"], int(message.from_user.id), reg_data["reg_has_car"], reg_data['reg_car_data'][0], reg_data['reg_car_data'][1])
         await state.clear()
     else:
         await state.clear()
