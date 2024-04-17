@@ -6,8 +6,10 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.enums.parse_mode import ParseMode
 from dotenv import load_dotenv
 
-from handlers import router, start_register, register_block, register_car_check, register_car_data, announce
+from handlers.commands import router
+from handlers.registration import start_register, register_block, register_car_check, register_car_data
 from states import RegisterState, AnnounceState
+from utils.commands import announce
 
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
@@ -26,7 +28,7 @@ dp.message.register(announce, AnnounceState.announce)
 
 async def main():
     """ Главная функция, запускающая обработку бота """
-    dp.include_router(router)
+    dp.include_routers(router, )
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
