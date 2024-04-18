@@ -26,6 +26,7 @@ async def start_command(message: Message):
     await message.answer(start_message, reply_markup=register_keyboard)
     await message.delete()
 
+
 @router.message(Command("help"))
 async def help_command(message: Message):
     """ Команда /help """
@@ -39,6 +40,7 @@ async def help_command(message: Message):
     help_reply = help_reply.strip()
 
     await message.reply(help_reply, parse_mode='HTML')
+
 
 @router.message(Command("announce"))
 async def announce_command(message: Message, state: FSMContext):
