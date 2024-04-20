@@ -12,10 +12,13 @@ def validate_block(block: str):
     if block[-1] not in "АБВГ":
         return False
 
-    if block[0].isdecimal() and block[1].isdecimal() and block[2].isdecimal() and block[-1].isalpha() and 200 < int(block[0:-1]) < 941: # Проверка на самый максимальный блок
-        return block
+    if not(block[0].isdecimal() and block[1].isdecimal() and block[2].isdecimal() and block[-1].isalpha()):
+        return False
     
-    return False
+    if not(2 <= int(block[0]) <= 9 and 1 <= int(block[1:3]) <= 40):
+        return False
+    
+    return block
 
 def validate_car_mark(car_mark: str, cars_marks_base: list):
     """ Проверяем марку машины на валидность """
