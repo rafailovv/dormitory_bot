@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from handlers.commands import router
 from handlers.registration import start_register, register_block, register_car_check, register_car_data
 from states import RegisterState, AnnounceState
-from utils.commands import announce, announce_text, create_schedules
+from utils.commands import announce, announce_text, create_schedules, dormitory_payment_notification, internet_payment_notification
 
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
@@ -33,10 +33,16 @@ async def main():
     # Считываем данные из Excel-файла
     create_schedules("./data/Announcements.xlsx", "Sheet1", announce_text)
 
-    # Создаем и запускаем процедуру, считывания данных из Excel-файла каждый день в 00:01
+    # Создаем планировщик задач и добавляем задачу, считывания данных из Excel-файла каждый день в 00:01
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
     scheduler.add_job(create_schedules, trigger="cron", hour=0, minute=1,
                       args=["./data/Announcements.xlsx", "Sheet1", announce_text])
+    
+    # Добавляем задачу отправки уведомления об оплате общежития и интернета
+    scheduler.add_job(dormitory_payment_notification, trigger="cron", day=9, hour=20, minute=0)
+    scheduler.add_job(internet_payment_notification, trigger="cron", day=21, hour=22, minute=50)
+    
+    # Запускаем планировщик
     scheduler.start()
 
     # Подключаем роутеры

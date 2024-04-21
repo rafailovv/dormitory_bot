@@ -17,11 +17,12 @@ bot = Bot(token=TOKEN_BOT, parse_mode=ParseMode.HTML)
 
 async def announce(message: Message, state: FSMContext):
     """ Вывод уведомления всем жителям общежития (Команда /announce)"""
+    
     await state.update_data(announce=message.text)
     announce_data = await state.get_data()
     announce_msg = announce_data.get("announce")
 
-    db = Database(os.getenv('DATABASE_NAME'))
+    db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users()
 
     for user in users:
@@ -34,13 +35,44 @@ async def announce(message: Message, state: FSMContext):
 
 async def announce_text(msg):
     """ Вывод сообщения всем жителям общежития """
-    db = Database(os.getenv('DATABASE_NAME'))
+    
+    db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users()
 
     for user in users:
         user_id = user[1]
         await bot.send_message(user_id, msg, parse_mode="HTML")
 
+
+async def dormitory_payment_notification():
+    """ Вывод сообщения всем жителям общежития об оплате общежития """
+    
+    db = Database(os.getenv("DATABASE_NAME"))
+    users = db.get_all_users()
+    
+    profile_authorization_link = os.getenv("PROFILE_AUTHORIZATION_LINK")
+    msg = ("<b><i>Дорогие жители общежития!</i></b>\n"
+           f"Не забудьте <a href='{profile_authorization_link}'>оплатить</a> общежитие, сегодня крайний срок оплаты!")
+    
+    for user in users:
+        user_id = user[1]
+        await bot.send_message(user_id, msg, parse_mode="HTML")
+
+
+async def internet_payment_notification():
+    """ Вывод сообщения всем жителям общежития об оплате интернета """
+    
+    db = Database(os.getenv("DATABASE_NAME"))
+    users = db.get_all_users()
+    
+    internet_payment_link = os.getenv("INTERNET_PAYMENT_LINK")
+    msg = ("<b><i>Дорогие жители общежития!</i></b>\n"
+           f"Не забудьте <a href='{internet_payment_link}'>оплатить</a> интернет, близится конец месяца!")
+    
+    for user in users:
+        user_id = user[1]
+        await bot.send_message(user_id, msg, parse_mode="HTML")
+        
 
 def create_schedules(filename="./data/Announcements.xlsx", sheet_name="Sheet1", myfunc=None):
     """ Функция, создающая процедуры для вывода уведомлений из Excel-файла """
@@ -57,8 +89,8 @@ def create_schedules(filename="./data/Announcements.xlsx", sheet_name="Sheet1", 
         msg = (f'<b>{df["Название задания"][i]}</b>\n'
         f'Дата начала: <i>{df["Дата начала"][i]}</i>\n'
         f'Дата окончания: <i>{df["Дата окончания"][i]}</i>\n')
-        if df['Дополнительная информация'][i]:
-            msg += f'{df['Дополнительная информация'][i]}\n'
+        if df["Дополнительная информация"][i]:
+            msg += f'{df["Дополнительная информация"][i]}\n'
         
         time = str(df["Время уведомления"][i])
         hour = int(time[:time.index(':')])
