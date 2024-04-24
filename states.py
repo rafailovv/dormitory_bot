@@ -9,3 +9,4 @@ class RegisterState(StatesGroup):
 class AnnounceState(StatesGroup):
     """ Состояние уведомления """
     announce = State()
+    announce_cars = State()

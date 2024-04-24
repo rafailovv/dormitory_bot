@@ -16,7 +16,7 @@ TOKEN_BOT = os.getenv("TOKEN_BOT")
 bot = Bot(token=TOKEN_BOT, parse_mode=ParseMode.HTML)
 
 async def announce(message: Message, state: FSMContext):
-    """ Вывод уведомления всем жителям общежития (Команда /announce)"""
+    """ Вывод уведомления всем жителям общежития """
     
     await state.update_data(announce=message.text)
     announce_data = await state.get_data()
@@ -24,7 +24,7 @@ async def announce(message: Message, state: FSMContext):
 
     db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users()
-
+    
     for user in users:
         user_id = user[1]
         await bot.send_message(user_id, announce_msg, parse_mode="HTML")
@@ -32,6 +32,23 @@ async def announce(message: Message, state: FSMContext):
     await state.clear()
     await message.reply("Это сообщение отправлено всем жителям общежития!")
 
+
+async def announce_cars(message: Message, state: FSMContext):
+    """ Вывод уведомления всем жителям общежития, у которых есть машина """
+    
+    await state.update_data(announce_cars=message.text)
+    announce_cars_data = await state.get_data()
+    announce_cars_msg = announce_cars_data.get("announce_cars")
+
+    db = Database(os.getenv("DATABASE_NAME"))
+    users = db.get_all_users_with_car()
+    
+    for user in users:
+        user_id = user[1]
+        await bot.send_message(user_id, announce_cars_msg, parse_mode="HTML")
+        
+    await state.clear()
+    await message.reply("Это сообщение отправлено всем жителям общежития, у которых есть машина!")
 
 async def announce_text(msg):
     """ Вывод сообщения всем жителям общежития """

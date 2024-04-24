@@ -45,11 +45,25 @@ async def help_command(message: Message):
 @router.message(Command("announce"))
 async def announce_command(message: Message, state: FSMContext):
     """ Команда /announce """
-    db = Database(os.getenv('DATABASE_NAME'))
+    db = Database(os.getenv("DATABASE_NAME"))
     user = db.is_user_admin(message.from_user.id)
 
     if user:
         await message.answer("Введите сообщение, которое вы хотите передать всем жителям общежития!")
         await state.set_state(AnnounceState.announce)
+    else:
+        await message.answer("У вас нет прав для использования этой команды!")
+
+
+@router.message(Command("announce_cars"))
+async def announce_cars(message: Message, state: FSMContext):
+    """ Команда /announce_cars """
+    
+    db = Database(os.getenv("DATABASE_NAME"))
+    user = db.is_user_admin(message.from_user.id)
+    
+    if user:
+        await message.answer("Введите сообщение, которое вы хотите передать всем жителям общежития, у которых есть машина!")
+        await state.set_state(AnnounceState.announce_cars)
     else:
         await message.answer("У вас нет прав для использования этой команды!")

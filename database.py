@@ -15,6 +15,7 @@ class Database():
 
     def __init__(self, db_name):
         """ Подключаемся к базе данных """
+        
         self.db = mysql.connector.connect(host=DATABASE_HOST, user=DATABASE_USER, password=DATABASE_PASSWORD, database=db_name)
         self.cursor = self.db.cursor()
         self.create_users_table()
@@ -23,6 +24,7 @@ class Database():
         
     def create_users_table(self):
         """ Создаем таблицу users """
+        
         try:
             query = ("CREATE TABLE IF NOT EXISTS users("
                      "id INT AUTO_INCREMENT PRIMARY KEY,"
@@ -38,13 +40,13 @@ class Database():
             
     def create_users_car_table(self):
         """ Создаем таблицу users_cars """
+        
         try:
             query = ("CREATE TABLE IF NOT EXISTS users_cars("
-                     "id INT AUTO_INCREMENT PRIMARY KEY,"
-                     "telegram_id INT,"
+                     "car_telegram_id INT PRIMARY KEY UNIQUE,"
                      "car_mark TEXT,"
                      "car_number TEXT,"
-                     "CONSTRAINT FK_telegram_id FOREIGN KEY (telegram_id) REFERENCES users (telegram_id)"
+                     "FOREIGN KEY (car_telegram_id) REFERENCES users (telegram_id)"
                      "ON UPDATE CASCADE ON DELETE CASCADE);")
             self.cursor.execute(query)
             self.db.commit()
@@ -54,33 +56,72 @@ class Database():
             
     def add_user(self, user_block, telegram_id, has_car=False, car_mark=None, car_number=None):
         """ Добавить пользователя в базу данных """
-        self.cursor.execute("INSERT INTO users (telegram_id, user_block, car, role) VALUES (%s, %s, %s, %s)", (int(telegram_id), user_block, has_car, "user"))
+        
+        try:
+            self.cursor.execute("INSERT INTO users (telegram_id, user_block, car, role) VALUES (%s, %s, %s, %s)", (int(telegram_id), user_block, has_car, "user"))
 
-        if has_car and car_mark and car_number:
-            self.cursor.execute("INSERT INTO users_cars (telegram_id, car_mark, car_number) VALUES (%s, %s, %s)", (int(telegram_id), car_mark, car_number))
+            if has_car and car_mark and car_number:
+                self.cursor.execute("INSERT INTO users_cars (car_telegram_id, car_mark, car_number) VALUES (%s, %s, %s)", (int(telegram_id), car_mark, car_number))
 
-        self.db.commit()
+            self.db.commit()
+        except:
+            print("Что-то пошло не так!")
+            return False
+        
+        return True
         
         
     def get_all_users(self):
         """ Получить всех пользователей бд """
-        self.cursor.execute("SELECT * FROM users")
-        users = self.cursor.fetchall()
+        
+        try:
+            self.cursor.execute("SELECT * FROM users")
+            users = self.cursor.fetchall()
+        except:
+            print("Что-то пошло не так!")
+            return False
+        
         return users
     
     
+    def get_all_users_with_car(self):
+        """ Получает всех пользователей бд, у которых есть машина """
+        
+        try:
+            query = ("SELECT id, telegram_id, user_block, role, car_mark, car_number FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id;")
+            
+            self.cursor.execute(query)
+            users = self.cursor.fetchall()
+        except:
+            print("Что-то пошло не так!")
+            return False
+        
+        return users
+    
     def select_user_id(self, telegram_id):
         """ Получам данные пользователя """
-        self.cursor.execute("SELECT * FROM users WHERE telegram_id = %s", (telegram_id, ))
-        user = self.cursor.fetchone()
+        
+        try:
+            self.cursor.execute("SELECT * FROM users WHERE telegram_id = %s", (telegram_id, ))
+            user = self.cursor.fetchone()
+        except:
+            print("Что-то пошло не так!")
+            return False
+        
         return user
     
     
     def is_user_admin(self, telegram_id):
         """ Проверят, админ ли пользователь по его telegram_id """
-        self.cursor.execute("SELECT * FROM users WHERE telegram_id = %s", (telegram_id, ))
-        user = self.cursor.fetchone() # How we can get data in dictionary instead list
-        if user[-1] == "admin":
+        
+        try:
+            self.cursor.execute("SELECT * FROM users WHERE telegram_id = %s", (telegram_id, ))
+            user = self.cursor.fetchone()
+        except:
+            print("Что-то пошло не так!")
+            return False
+        
+        if user[-1] == "admin":    
             return user
         else:
             return False
@@ -88,10 +129,11 @@ class Database():
         
     def can_change_block(self, telegram_id):
         """ Функция, проверяющая, можно ли изменить блок """
-        self.cursor.execute('SELECT last_block_change FROM users WHERE telegram_id = %s', (telegram_id,))
+        
+        self.cursor.execute("SELECT last_block_change FROM users WHERE telegram_id = %s", (telegram_id,))
         result = self.cursor.fetchone()
         if result:
-            last_change_time = datetime.strptime(result[0], '%Y-%m-%d %H:%M:%S')
+            last_change_time = datetime.strptime(result[0], "%Y-%m-%d %H:%M:%S")
             if datetime.now() - last_change_time >= timedelta(days=7):
                 return True
         return False
@@ -99,12 +141,14 @@ class Database():
     
     def change_block(self, telegram_id, new_block):
         """ Функция изменения блока """
-        self.cursor.execute('UPDATE users SET user_block = %s, last_block_change = %s WHERE telegram_id = %s',
+        
+        self.cursor.execute("UPDATE users SET user_block = %s, last_block_change = %s WHERE telegram_id = %s",
                             (new_block, datetime.now(), telegram_id))
         self.db.commit()
         
         
     def __del__(self):
         """ Закрываем подключение к бд """
+        
         self.cursor.close()
         self.db.close()

@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from handlers.commands import router
 from handlers.registration import start_register, register_block, register_car_check, register_car_data
 from states import RegisterState, AnnounceState
-from utils.commands import announce, announce_text, create_schedules, dormitory_payment_notification, internet_payment_notification
+from utils.commands import announce, announce_text, announce_cars, create_schedules, dormitory_payment_notification, internet_payment_notification
 
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
@@ -24,8 +24,9 @@ dp.message.register(register_block, RegisterState.reg_block)
 dp.message.register(register_car_check, RegisterState.reg_has_car)
 dp.message.register(register_car_data, RegisterState.reg_car_data)
 
-""" Регистрируем хендлер уведомления """
+""" Регистрируем хендлеры уведомления """
 dp.message.register(announce, AnnounceState.announce)
+dp.message.register(announce_cars, AnnounceState.announce_cars)
 
 async def main():
     """ Главная функция, запускающая обработку бота """
