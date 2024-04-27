@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import mysql.connector
 from dotenv import load_dotenv
 
+
 load_dotenv()
 DATABASE_HOST = os.getenv("DATABASE_HOST")
 DATABASE_USER = os.getenv("DATABASE_USER")

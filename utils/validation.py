@@ -1,5 +1,6 @@
 from transliterate import translit
 
+
 def validate_block(block: str):
     """ Проверяем блок на валидность """
     block = block.strip()
@@ -20,6 +21,7 @@ def validate_block(block: str):
     
     return block
 
+
 def validate_car_mark(car_mark: str, cars_marks_base: list):
     """ Проверяем марку машины на валидность """
     car_mark = car_mark.strip().lower()
@@ -29,6 +31,7 @@ def validate_car_mark(car_mark: str, cars_marks_base: list):
             return True
     
     return False
+
 
 def validate_car_number(car_number: str):
     """ Проверяем номера машины на валидность """

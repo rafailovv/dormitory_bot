@@ -10,13 +10,20 @@ import pandas as pd
 
 from database import Database
 
+
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
 
 bot = Bot(token=TOKEN_BOT, parse_mode=ParseMode.HTML)
 
+
 async def announce(message: Message, state: FSMContext):
     """ Вывод уведомления всем жителям общежития """
+    
+    if message.text == "/cancel":
+        await state.clear()
+        await message.reply("Ничего не произошло")
+        return
     
     await state.update_data(announce=message.text)
     announce_data = await state.get_data()
@@ -35,6 +42,11 @@ async def announce(message: Message, state: FSMContext):
 
 async def announce_cars(message: Message, state: FSMContext):
     """ Вывод уведомления всем жителям общежития, у которых есть машина """
+    
+    if message.text == "/cancel":
+        await state.clear()
+        await message.reply("Ничего не произошло")
+        return
     
     await state.update_data(announce_cars=message.text)
     announce_cars_data = await state.get_data()

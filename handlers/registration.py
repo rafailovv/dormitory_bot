@@ -10,10 +10,13 @@ from states import RegisterState
 from database import Database
 from utils.validation import validate_block, validate_car_mark, validate_car_number
 
+
 load_dotenv()
+
 
 async def start_register(message: Message, state: FSMContext):
     """ Регистрации """
+    
     db = Database(os.getenv('DATABASE_NAME'))
     user = db.select_user_id(message.from_user.id)
     if(user):
@@ -24,8 +27,10 @@ async def start_register(message: Message, state: FSMContext):
                                 f'Например: 617А')
         await state.set_state(RegisterState.reg_block)
 
+
 async def register_block(message: Message, state: FSMContext):
     """ Окончание регистрации """
+    
     block = validate_block(message.text)
     if block:
         await state.update_data(reg_block=block)
@@ -35,10 +40,11 @@ async def register_block(message: Message, state: FSMContext):
         await state.clear()
         await message.answer("Номер блока введен некорректно! Начните регистрацию заново.", reply_markup=register_keyboard)
 
+
 async def register_car_check(message: Message, state: FSMContext):
     """ Регистрация машины при наличии """
+    
     if message.text.strip().lower() == "да":
-        # Enter car
         await state.update_data(reg_has_car=True)
         await message.answer(f"Введите марку и номер своей машины в одну строку.)\n"
                                 f"Внимание, будь очень внимательны, проверь все ли ввели правильно!\n"
@@ -57,18 +63,22 @@ async def register_car_check(message: Message, state: FSMContext):
         db.add_user(reg_data["reg_block"], int(message.from_user.id), reg_data["reg_has_car"])
         await state.clear()
 
+
 async def register_car_data(message: Message, state: FSMContext):
     """ Регистрирует марку и номер машины """
-    car_data = message.text.split()
-
-    if len(car_data) != 2:
+    
+    car_data = message.text.strip()
+    
+    if car_data.count(" ") != 1:
         await state.clear()
         await message.answer("Данные введенны некорректно! Начните регистрацию заново.", reply_markup=register_keyboard)
         return
-
-    car_mark, car_number = car_data[0], car_data[1]
-
+    
+    car_mark, car_number = car_data.split()
+    car_mark = car_mark.title()
+    car_number = car_number.upper()
     cars_marks_base = None
+    
     with open('./data/cars.json', 'r', encoding="utf-8") as file:
         cars_marks_base = json.load(file,)
 

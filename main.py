@@ -12,6 +12,7 @@ from handlers.registration import start_register, register_block, register_car_c
 from states import RegisterState, AnnounceState
 from utils.commands import announce, announce_text, announce_cars, create_schedules, dormitory_payment_notification, internet_payment_notification
 
+
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
 
@@ -27,6 +28,7 @@ dp.message.register(register_car_data, RegisterState.reg_car_data)
 """ Регистрируем хендлеры уведомления """
 dp.message.register(announce, AnnounceState.announce)
 dp.message.register(announce_cars, AnnounceState.announce_cars)
+
 
 async def main():
     """ Главная функция, запускающая обработку бота """
@@ -50,6 +52,7 @@ async def main():
     dp.include_router(router)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

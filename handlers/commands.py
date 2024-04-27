@@ -11,11 +11,13 @@ from keyboards.keyboards import register_keyboard
 from states import AnnounceState
 from database import Database
 
+
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
 
 bot = Bot(token=TOKEN_BOT, parse_mode=ParseMode.HTML)
 router = Router()
+
 
 @router.message(CommandStart())
 async def start_command(message: Message):
