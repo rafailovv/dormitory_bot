@@ -89,7 +89,7 @@ class Database():
         """ Получает всех пользователей бд, у которых есть машина """
         
         try:
-            query = ("SELECT id, telegram_id, user_block, role, car_mark, car_number FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id;")
+            query = "SELECT id, telegram_id, user_block, role, car_mark, car_number FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id;"
             
             self.cursor.execute(query)
             users = self.cursor.fetchall()
@@ -98,6 +98,22 @@ class Database():
             return False
         
         return users
+    
+    
+    def get_user_by_car_number(self, car_number):
+        """ Получает пользователя с определенным номером машины """
+        
+        try:
+            query = "SELECT id, telegram_id, user_block, role, car_mark, car_number FROM users JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id WHERE car_number = %s"
+            
+            self.cursor.execute(query, (car_number, ))
+            user = self.cursor.fetchone()
+        except:
+            print("Что-то пошло не так!")
+            return False
+        
+        return user
+    
     
     def select_user_id(self, telegram_id):
         """ Получам данные пользователя """

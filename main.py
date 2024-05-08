@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from handlers.commands import router
 from handlers.registration import start_register, register_block, register_car_check, register_car_data
 from states import RegisterState, AnnounceState
-from utils.commands import announce, announce_text, announce_cars, create_schedules, dormitory_payment_notification, internet_payment_notification
+from utils.commands import announce, announce_text, announce_cars, announce_car_number, announce_car_message, create_schedules, dormitory_payment_notification, internet_payment_notification
 
 
 load_dotenv()
@@ -28,6 +28,8 @@ dp.message.register(register_car_data, RegisterState.reg_car_data)
 """ Регистрируем хендлеры уведомления """
 dp.message.register(announce, AnnounceState.announce)
 dp.message.register(announce_cars, AnnounceState.announce_cars)
+dp.message.register(announce_car_number, AnnounceState.announce_car_number)
+dp.message.register(announce_car_message, AnnounceState.announce_car_message)
 
 
 async def main():

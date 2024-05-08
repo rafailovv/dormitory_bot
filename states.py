@@ -12,3 +12,5 @@ class AnnounceState(StatesGroup):
     """ Состояние уведомления """
     announce = State()
     announce_cars = State()
+    announce_car_number = State()
+    announce_car_message = State()

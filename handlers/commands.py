@@ -69,3 +69,17 @@ async def announce_cars(message: Message, state: FSMContext):
         await state.set_state(AnnounceState.announce_cars)
     else:
         await message.answer("У вас нет прав для использования этой команды!")
+
+
+@router.message(Command("announce_car"))
+async def announce_car(message: Message, state: FSMContext):
+    """ Команда /announce_car """
+    
+    db = Database(os.getenv("DATABASE_NAME"))
+    user = db.is_user_admin(message.from_user.id)
+    
+    if user:
+        await message.answer("Введите номер машины, владельцу которой вы хотите передать сообщение!")
+        await state.set_state(AnnounceState.announce_car_number)
+    else:
+        await message.answer("У вас нет прав для использования этой команды!")

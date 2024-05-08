@@ -46,7 +46,7 @@ async def register_car_check(message: Message, state: FSMContext):
     
     if message.text.strip().lower() == "да":
         await state.update_data(reg_has_car=True)
-        await message.answer(f"Введите марку и номер своей машины в одну строку.)\n"
+        await message.answer(f"Введите марку и номер своей машины в одну строку.\n"
                                 f"Внимание, будь очень внимательны, проверь все ли ввели правильно!\n"
                                 f"При вводе номера испольйте только английские символы и цифры. Будьте очень внимательны!\n"
                                 f"Формат ввода: Марка Номер\n"
