@@ -11,7 +11,7 @@ DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 
 
-class Database():
+class Database:
     """ Класс для взаимодействия с базой данных """
 
     def __init__(self, db_name):

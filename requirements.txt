@@ -1,0 +1,6 @@
+aiogram>=0.0.1
+pandas>=0.0.1
+mysql-connector-python>=0.0.1
+python-dotenv>=0.0.1
+transliterate>=0.0.1
+apscheduler>=0.0.1

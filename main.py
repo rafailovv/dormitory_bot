@@ -3,7 +3,7 @@ import logging
 
 import asyncio
 from aiogram import Bot, Dispatcher, F
-from aiogram.enums.parse_mode import ParseMode
+from aiogram.enums.parse_mode import ParseModegit
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 
@@ -16,7 +16,7 @@ from utils.commands import announce, announce_text, announce_cars, announce_car_
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
 
-bot = Bot(token=TOKEN_BOT, parse_mode=ParseMode.HTML)
+bot = Bot(token=TOKEN_BOT) # parse_mode=ParseMode.HTML
 dp = Dispatcher()
 
 """ Регистрируем хендлер регистрации """

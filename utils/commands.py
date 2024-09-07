@@ -16,7 +16,7 @@ from utils.validation import validate_car_number
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
 
-bot = Bot(token=TOKEN_BOT, parse_mode=ParseMode.HTML)
+bot = Bot(token=TOKEN_BOT) # parse_mode=ParseMode.HTML
 
 
 async def announce(message: Message, state: FSMContext):

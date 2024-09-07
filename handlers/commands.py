@@ -15,7 +15,7 @@ from database import Database
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
 
-bot = Bot(token=TOKEN_BOT, parse_mode=ParseMode.HTML)
+bot = Bot(token=TOKEN_BOT) # parse_mode=ParseMode.HTML
 router = Router()
 
 
