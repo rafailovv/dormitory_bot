@@ -3,7 +3,7 @@ import logging
 
 import asyncio
 from aiogram import Bot, Dispatcher, F
-from aiogram.enums.parse_mode import ParseModegit
+from aiogram.enums.parse_mode import ParseMode # fix
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 
