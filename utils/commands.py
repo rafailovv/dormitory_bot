@@ -2,6 +2,7 @@ import os
 
 from aiogram import Bot
 from aiogram.enums.parse_mode import ParseMode
+from aiogram.client.bot import DefaultBotProperties
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -16,7 +17,7 @@ from utils.validation import validate_car_number
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
 
-bot = Bot(token=TOKEN_BOT) # parse_mode=ParseMode.HTML
+bot = Bot(token=TOKEN_BOT, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 
 async def announce(message: Message, state: FSMContext):

@@ -1,6 +1,7 @@
 import os
 
 from aiogram import Router, Bot
+from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
@@ -15,7 +16,7 @@ from database import Database
 load_dotenv()
 TOKEN_BOT = os.getenv("TOKEN_BOT")
 
-bot = Bot(token=TOKEN_BOT) # parse_mode=ParseMode.HTML
+bot = Bot(token=TOKEN_BOT, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 router = Router()
 
 
