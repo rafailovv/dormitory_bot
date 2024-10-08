@@ -6,11 +6,14 @@ from aiogram.enums.parse_mode import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
+import pandas as pd
 
 from keyboards.keyboards import register_keyboard
 from states import AnnounceState
 from database import Database
+from utils.commands import create_schedules, announce_text
 
 
 load_dotenv()
@@ -82,5 +85,31 @@ async def announce_car(message: Message, state: FSMContext):
     if user:
         await message.answer("Введите номер машины, владельцу которой вы хотите передать сообщение!")
         await state.set_state(AnnounceState.announce_car_number)
+    else:
+        await message.answer("У вас нет прав для использования этой команды!")
+
+
+@router.message(Command("check_schedule"))
+async def check_schedule(message: Message, state: FSMContext):
+    """ Команда /check_schedule """
+    
+    db = Database(os.getenv("DATABASE_NAME"))
+    user = db.is_user_admin(message.from_user.id)
+    
+    if user:
+        try:
+            # Считываем данные из Excel-файла
+            create_schedules("./data/Announcements.xlsx", "Sheet1", announce_text)
+
+            # Создаем планировщик задач и добавляем задачу, считывания данных из Excel-файла каждый день в 00:01
+            scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+            scheduler.add_job(create_schedules, trigger="cron", hour=0, minute=1,
+                            args=["./data/Announcements.xlsx", "Sheet1", announce_text])
+            
+            scheduler.start()
+            
+            await message.answer("Данные обновились!")
+        except:
+            await message.answer("Неопознанная ошибка")
     else:
         await message.answer("У вас нет прав для использования этой команды!")
