@@ -33,16 +33,32 @@ async def start_command(message: Message):
 @router.message(Command("help"))
 async def help_command(message: Message):
     """ Команда /help """
-    commands_desc = {"start": "запуск бота",
-                     "help": "показывает список команд",
-                     "announce": "уведомляет всех жителей общежития"}
+    commands_desc = {"start": "Запуск бота",
+                     "help": "Показывает список команд",
+                     "info": "Показывает информацию для жителей общежития (Номер общежития и т.п.)",
+                     "announce": "Уведомляет всех жителей общежития (Только для админов)",
+                     "announce_cars": "Уведомляет всех владельцев автомобилей, проживающих в общежитии (Только для админов)",
+                     "announce_car": "Уведомяет жильца общежития с определенным номером машины (Только для админов)",
+                     "cancel": "Отмена выполнение некоторых команд"}
 
     help_reply = ""
     for key in commands_desc:
         help_reply += f"<b>/{key}</b> - <em>{commands_desc[key]}</em>\n"
     help_reply = help_reply.strip()
 
-    await message.reply(help_reply, parse_mode='HTML')
+    await message.reply(help_reply, parse_mode="HTML")
+
+
+@router.message(Command("info"))
+async def help_command(message: Message):
+    """ Команда /info """
+    
+    reply_message = ("Номер общежития: <a href='tel:+79779437901'>+7 (977) 943-79-01</a>\n"
+                    "Почта для отправки чеков об оплате общежития: <a href='mailto:obsh4miit@yandex.ru'>obsh4miit@yandex.ru</a>\n"
+                    "Время смены постельного белья: \n"
+                    "Пн-Ср 9:00-12:00, 17:00-18:00\n")
+    
+    await message.reply(reply_message, parse_mode="HTML")
 
 
 @router.message(Command("announce"))
