@@ -55,8 +55,8 @@ async def register_car_check(message: Message, state: FSMContext):
     elif message.text.strip().lower() == "нет":
         await state.update_data(reg_has_car=False)
         reg_data = await state.get_data()
-        msg = (f'Регистрация прошла успешно\n'
-                f'Ваш блок: {reg_data['reg_block']}\n')
+        msg = (f"Регистрация прошла успешно\n"
+                f"Ваш блок: {reg_data['reg_block']}\n")
         await message.answer(msg)
         
         db = Database(os.getenv('DATABASE_NAME'))
