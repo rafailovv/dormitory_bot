@@ -3,6 +3,6 @@
 
 Бот запущен, перейти к нему Вы можете по ссылке @dormitory4_bot
 
-Обратная связь:
-Telegram: @rafailovv
+Обратная связь:  
+Telegram: @rafailovv  
 Mail: arsraf00@gmail.com
