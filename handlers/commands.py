@@ -60,7 +60,7 @@ async def help_command(message: Message):
     reply_message = ("Номер общежития: <a href='tel:+79779437901'>+7 (977) 943-79-01</a>\n"
                     "Почта для отправки чеков об оплате общежития: <a href='mailto:obsh4miit@yandex.ru'>obsh4miit@yandex.ru</a>\n"
                     "Время смены постельного белья: \n"
-                    "Пн-Ср 9:00-12:00, 17:00-18:00\n")
+                    "Пн-Ср 9:00-12:00, 16:00-18:00\n")
     
     await message.reply(reply_message, parse_mode="HTML")
 
