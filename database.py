@@ -30,9 +30,10 @@ class Database:
             query = ("CREATE TABLE IF NOT EXISTS users("
                      "id INT AUTO_INCREMENT PRIMARY KEY,"
                      "telegram_id INT UNIQUE,"
-                     "user_block TEXT,"
+                     "user_block_number INT NOT NULL,"
                      "car BOOL NOT NULL,"
-                     "role TEXT);")
+                     "role TEXT,"
+                     "user_block_letter NVARCHAR(1) NOT NULL);")
             self.cursor.execute(query)
             self.db.commit()
         except mysql.connector.Error as Error:
@@ -57,9 +58,10 @@ class Database:
             
     def add_user(self, user_block, telegram_id, has_car=False, car_mark=None, car_number=None):
         """ Добавить пользователя в базу данных """
-        
+        user_block_number = int(user_block[:-1])
+        user_block_letter = user_block[-1:]
         try:
-            self.cursor.execute("INSERT INTO users (telegram_id, user_block, car, role) VALUES (%s, %s, %s, %s)", (int(telegram_id), user_block, has_car, "user"))
+            self.cursor.execute("INSERT INTO users (telegram_id, user_block_number, user_block_letter, car, role) VALUES (%s, %s, %s, %s)", (int(telegram_id), user_block_number, user_block_letter, has_car, "user"))
 
             if has_car and car_mark and car_number:
                 self.cursor.execute("INSERT INTO users_cars (car_telegram_id, car_mark, car_number) VALUES (%s, %s, %s)", (int(telegram_id), car_mark, car_number))
@@ -89,7 +91,7 @@ class Database:
         """ Получает всех пользователей бд, у которых есть машина """
         
         try:
-            query = "SELECT id, telegram_id, user_block, role, car_mark, car_number FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id;"
+            query = "SELECT id, telegram_id, user_block_number, user_block_letter role, car_mark, car_number FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id;"
             
             self.cursor.execute(query)
             users = self.cursor.fetchall()
@@ -104,7 +106,7 @@ class Database:
         """ Получает пользователя с определенным номером машины """
         
         try:
-            query = "SELECT id, telegram_id, user_block, role, car_mark, car_number FROM users JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id WHERE car_number = %s"
+            query = "SELECT id, telegram_id, user_block_number, user_block_letter, role, car_mark, car_number FROM users JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id WHERE car_number = %s"
             
             self.cursor.execute(query, (car_number, ))
             user = self.cursor.fetchone()

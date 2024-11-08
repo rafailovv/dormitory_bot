@@ -36,7 +36,7 @@ async def announce(message: Message, state: FSMContext):
     users = db.get_all_users()
     
     for user in users:
-        user_id = user[1]
+        user_id = user[1] # telegram_id selection
         await bot.send_message(user_id, announce_msg, parse_mode="HTML")
         
     await state.clear()
@@ -59,7 +59,7 @@ async def announce_cars(message: Message, state: FSMContext):
     users = db.get_all_users_with_car()
     
     for user in users:
-        user_id = user[1]
+        user_id = user[1] # telegram_id selection
         await bot.send_message(user_id, announce_cars_msg, parse_mode="HTML")
         
     await state.clear()
@@ -123,7 +123,7 @@ async def announce_text(msg):
     users = db.get_all_users()
 
     for user in users:
-        user_id = user[1]
+        user_id = user[1] # telegram_id selection
         await bot.send_message(user_id, msg, parse_mode="HTML")
 
 
@@ -138,7 +138,7 @@ async def dormitory_payment_notification():
            f"Не забудьте <a href='{profile_authorization_link}'>оплатить</a> общежитие, сегодня крайний срок оплаты!")
     
     for user in users:
-        user_id = user[1]
+        user_id = user[1] # telegram_id selection
         await bot.send_message(user_id, msg, parse_mode="HTML")
 
 
@@ -148,7 +148,7 @@ async def internet_payment_notification():
     db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users()
     
-    internet_payment_link = os.getenv("INTERNET_PAYMENT_LINK")
+    internet_payment_link = os.getenv("INTERNET_PAYMENT_LINK") if os.getenv("INTERNET_PAYMENT_LINK") is not None else "#"
     msg = ("<b><i>Дорогие жители общежития!</i></b>\n"
            f"Не забудьте <a href='{internet_payment_link}'>оплатить</a> интернет, близится конец месяца!")
     
