@@ -45,10 +45,10 @@ class Database:
         
         try:
             query = ("CREATE TABLE IF NOT EXISTS users_cars("
-                     "car_telegram_id INT PRIMARY KEY UNIQUE,"
+                     "telegram_id INT PRIMARY KEY UNIQUE,"
                      "car_mark TEXT,"
                      "car_number TEXT,"
-                     "FOREIGN KEY (car_telegram_id) REFERENCES users (telegram_id)"
+                     "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id)"
                      "ON UPDATE CASCADE ON DELETE CASCADE);")
             self.cursor.execute(query)
             self.db.commit()
@@ -64,7 +64,7 @@ class Database:
             self.cursor.execute("INSERT INTO users (telegram_id, user_block_number, user_block_letter, car, role) VALUES (%s, %s, %s, %s)", (int(telegram_id), user_block_number, user_block_letter, has_car, "user"))
 
             if has_car and car_mark and car_number:
-                self.cursor.execute("INSERT INTO users_cars (car_telegram_id, car_mark, car_number) VALUES (%s, %s, %s)", (int(telegram_id), car_mark, car_number))
+                self.cursor.execute("INSERT INTO users_cars (telegram_id, car_mark, car_number) VALUES (%s, %s, %s)", (int(telegram_id), car_mark, car_number))
 
             self.db.commit()
         except:
@@ -91,7 +91,7 @@ class Database:
         """ Получает всех пользователей бд, у которых есть машина """
         
         try:
-            query = "SELECT id, telegram_id, user_block_number, user_block_letter role, car_mark, car_number FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id;"
+            query = "SELECT id, telegram_id, user_block_number, user_block_letter role, car_mark, car_number FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.telegram_id;"
             
             self.cursor.execute(query)
             users = self.cursor.fetchall()
@@ -106,7 +106,7 @@ class Database:
         """ Получает пользователя с определенным номером машины """
         
         try:
-            query = "SELECT id, telegram_id, user_block_number, user_block_letter, role, car_mark, car_number FROM users JOIN users_cars ON users.telegram_id = users_cars.car_telegram_id WHERE car_number = %s"
+            query = "SELECT id, telegram_id, user_block_number, user_block_letter, role, car_mark, car_number FROM users JOIN users_cars ON users.telegram_id = users_cars.telegram_id WHERE car_number = %s"
             
             self.cursor.execute(query, (car_number, ))
             user = self.cursor.fetchone()
