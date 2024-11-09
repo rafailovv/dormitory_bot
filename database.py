@@ -61,7 +61,7 @@ class Database:
         user_block_number = int(user_block[:-1])
         user_block_letter = user_block[-1:]
         try:
-            self.cursor.execute("INSERT INTO users (telegram_id, user_block_number, user_block_letter, car, role) VALUES (%s, %s, %s, %s)", (int(telegram_id), user_block_number, user_block_letter, has_car, "user"))
+            self.cursor.execute("INSERT INTO users (telegram_id, user_block_number, user_block_letter, car, role) VALUES (%s, %s, %s, %s, %s)", (int(telegram_id), user_block_number, user_block_letter, has_car, "user"))
 
             if has_car and car_mark and car_number:
                 self.cursor.execute("INSERT INTO users_cars (telegram_id, car_mark, car_number) VALUES (%s, %s, %s)", (int(telegram_id), car_mark, car_number))
@@ -134,13 +134,13 @@ class Database:
         """ Проверят, админ ли пользователь по его telegram_id """
         
         try:
-            self.cursor.execute("SELECT * FROM users WHERE telegram_id = %s", (telegram_id, ))
+            self.cursor.execute("SELECT role FROM users WHERE telegram_id = %s", (telegram_id, ))
             user = self.cursor.fetchone()
         except:
             print("Что-то пошло не так!")
             return False
         
-        if user[-1] == "admin":    
+        if user[0] == "admin": # index bug
             return user
         else:
             return False
