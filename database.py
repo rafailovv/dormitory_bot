@@ -33,8 +33,8 @@ class Database:
                      "user_block_number INT NOT NULL,"
                      "car BOOL NOT NULL,"
                      "role TEXT,"
-                     "user_block_letter NVARCHAR(1) NOT NULL)"
-                     "registration_date DATE NOT NULL DEFAULT (CURRENT_DATE());")
+                     "user_block_letter NVARCHAR(1) NOT NULL,"
+                     "registration_date DATE NOT NULL DEFAULT (CURRENT_DATE));")
             
             self.cursor.execute(query)
             self.db.commit()
