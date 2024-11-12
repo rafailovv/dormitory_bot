@@ -1,6 +1,6 @@
 import os
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import mysql.connector
 from dotenv import load_dotenv
 
@@ -33,7 +33,9 @@ class Database:
                      "user_block_number INT NOT NULL,"
                      "car BOOL NOT NULL,"
                      "role TEXT,"
-                     "user_block_letter NVARCHAR(1) NOT NULL);")
+                     "user_block_letter NVARCHAR(1) NOT NULL)"
+                     "registration_date DATE NOT NULL DEFAULT (CURRENT_DATE());")
+            
             self.cursor.execute(query)
             self.db.commit()
         except mysql.connector.Error as Error:
@@ -60,8 +62,11 @@ class Database:
         """ Добавить пользователя в базу данных """
         user_block_number = int(user_block[:-1])
         user_block_letter = user_block[-1:]
+        
+        cur_date = date.today().strftime("%Y-%m-%d")
+        
         try:
-            self.cursor.execute("INSERT INTO users (telegram_id, user_block_number, user_block_letter, car, role) VALUES (%s, %s, %s, %s, %s)", (int(telegram_id), user_block_number, user_block_letter, has_car, "user"))
+            self.cursor.execute("INSERT INTO users (telegram_id, user_block_number, user_block_letter, car, role, registration_date) VALUES (%s, %s, %s, %s, %s, %s)", (int(telegram_id), user_block_number, user_block_letter, has_car, "user", cur_date))
 
             if has_car and car_mark and car_number:
                 self.cursor.execute("INSERT INTO users_cars (telegram_id, car_mark, car_number) VALUES (%s, %s, %s)", (int(telegram_id), car_mark, car_number))
@@ -91,7 +96,7 @@ class Database:
         """ Получает всех пользователей бд, у которых есть машина """
         
         try:
-            query = "SELECT id, telegram_id, user_block_number, user_block_letter role, car_mark, car_number FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.telegram_id;"
+            query = "SELECT id, telegram_id, user_block_number, user_block_letter role, car_mark, car_number, registration_date FROM users INNER JOIN users_cars ON users.telegram_id = users_cars.telegram_id;"
             
             self.cursor.execute(query)
             users = self.cursor.fetchall()
@@ -106,7 +111,7 @@ class Database:
         """ Получает пользователя с определенным номером машины """
         
         try:
-            query = "SELECT id, telegram_id, user_block_number, user_block_letter, role, car_mark, car_number FROM users JOIN users_cars ON users.telegram_id = users_cars.telegram_id WHERE car_number = %s"
+            query = "SELECT id, telegram_id, user_block_number, user_block_letter, role, car_mark, car_number, registration_date FROM users JOIN users_cars ON users.telegram_id = users_cars.telegram_id WHERE car_number = %s"
             
             self.cursor.execute(query, (car_number, ))
             user = self.cursor.fetchone()
