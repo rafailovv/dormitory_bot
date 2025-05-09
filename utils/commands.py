@@ -1,3 +1,4 @@
+""" Utils module command """
 import os
 
 from aiogram import Bot
@@ -22,66 +23,61 @@ bot = Bot(token=TOKEN_BOT, default=DefaultBotProperties(parse_mode=ParseMode.HTM
 
 async def announce(message: Message, state: FSMContext):
     """ Вывод уведомления всем жителям общежития """
-    
     if message.text == "/cancel":
         await state.clear()
         await message.reply("Ничего не произошло")
         return
-    
+
     await state.update_data(announce=message.text)
     announce_data = await state.get_data()
     announce_msg = announce_data.get("announce")
 
     db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users()
-    
+
     for user in users:
         user_id = user[1] # telegram_id selection
         await bot.send_message(user_id, announce_msg, parse_mode="HTML")
-        
+
     await state.clear()
     await message.reply("Это сообщение отправлено всем жителям общежития!")
 
-
 async def announce_cars(message: Message, state: FSMContext):
     """ Вывод уведомления всем жителям общежития, у которых есть машина """
-    
     if message.text == "/cancel":
         await state.clear()
         await message.reply("Ничего не произошло")
         return
-    
+
     await state.update_data(announce_cars=message.text)
     announce_cars_data = await state.get_data()
     announce_cars_msg = announce_cars_data.get("announce_cars")
 
     db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users_with_car()
-    
+
     for user in users:
         user_id = user[1] # telegram_id selection
         await bot.send_message(user_id, announce_cars_msg, parse_mode="HTML")
-        
+
     await state.clear()
     await message.reply("Это сообщение отправлено всем жителям общежития, у которых есть машина!")
 
-
 async def announce_car_number(message: Message, state: FSMContext):
     """ Ввод номера машины, владельцу которой будет отправленно сообщение """
-    
     if message.text == "/cancel":
         await state.clear()
         await message.reply("Ничего не произошло")
         return
-    
+
     await state.update_data(announce_car_number=message.text.strip().upper())
     announce_car = await state.get_data()
     car_number = announce_car.get("announce_car_number")
-    
+
     if validate_car_number(car_number):
         db = Database(os.getenv("DATABASE_NAME"))
         user = db.get_user_by_car_number(car_number)
-        
+
         if user:
             await message.reply("Введите сообщение, которое вы хотите отправить владельцу машины!")
             await state.set_state(AnnounceState.announce_car_message)
@@ -92,74 +88,68 @@ async def announce_car_number(message: Message, state: FSMContext):
         await state.clear()
         await message.reply("Номера машины введены некорректно!\nФормат ввода: A123BC")
 
-
 async def announce_car_message(message: Message, state: FSMContext):
     """ Ввод сообщения, которое будет отправленно владельцу машины """
-    
     if message.text == "/cancel":
         await state.clear()
         await message.reply("Ничего не произошло")
         return
-    
+
     await state.update_data(announce_car_message=message.text.strip())
     announce_car = await state.get_data()
     car_number = announce_car.get("announce_car_number")
     car_message = announce_car.get("announce_car_message")
-    
+
     db = Database(os.getenv("DATABASE_NAME"))
     user = db.get_user_by_car_number(car_number)
-    
+
     if user:
         user_id = user[1]
         await bot.send_message(user_id, car_message, parse_mode="HTML")
         await message.reply(f"Это сообщение отправленно владельцу машины с номерами: {car_number}")
         await state.clear()
 
-
 async def announce_text(msg):
     """ Вывод сообщения всем жителям общежития """
-    
     db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users()
 
     for user in users:
         user_id = user[1] # telegram_id selection
         await bot.send_message(user_id, msg, parse_mode="HTML")
-
 
 async def dormitory_payment_notification():
     """ Вывод сообщения всем жителям общежития об оплате общежития """
-    
+
     db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users()
-    
+
     profile_authorization_link = os.getenv("PROFILE_AUTHORIZATION_LINK")
     msg = ("<b><i>Дорогие жители общежития!</i></b>\n"
-           f"Не забудьте <a href='{profile_authorization_link}'>оплатить</a> общежитие, сегодня крайний срок оплаты!")
-    
+           f"Не забудьте <a href='{profile_authorization_link}'>оплатить</a> общежитие, "
+           "сегодня крайний срок оплаты!")
+
     for user in users:
         user_id = user[1] # telegram_id selection
         await bot.send_message(user_id, msg, parse_mode="HTML")
 
-
 async def internet_payment_notification():
     """ Вывод сообщения всем жителям общежития об оплате интернета """
-    
     db = Database(os.getenv("DATABASE_NAME"))
     users = db.get_all_users()
-    
-    internet_payment_link = os.getenv("INTERNET_PAYMENT_LINK") if os.getenv("INTERNET_PAYMENT_LINK") is not None else "#"
+
+    internet_payment_link = os.getenv("INTERNET_PAYMENT_LINK") \
+        if os.getenv("INTERNET_PAYMENT_LINK") is not None else "#"
     msg = ("<b><i>Дорогие жители общежития!</i></b>\n"
-           f"Не забудьте <a href='{internet_payment_link}'>оплатить</a> интернет, близится конец месяца!")
-    
+           f"Не забудьте <a href='{internet_payment_link}'>оплатить</a> интернет, "
+           "близится конец месяца!")
+
     for user in users:
         user_id = user[1]
         await bot.send_message(user_id, msg, parse_mode="HTML")
-        
 
 def create_schedules(filename="./data/Announcements.xlsx", sheet_name="Sheet1", myfunc=None):
     """ Функция, создающая процедуры для вывода уведомлений из Excel-файла """
-    
     df = pd.read_excel(filename, sheet_name=sheet_name)
     df["Дата начала"] = pd.to_datetime(df["Дата начала"]).dt.strftime("%d.%m.%Y")
     df["Дата окончания"] = pd.to_datetime(df["Дата окончания"]).dt.strftime("%d.%m.%Y")
@@ -172,9 +162,10 @@ def create_schedules(filename="./data/Announcements.xlsx", sheet_name="Sheet1", 
         msg = (f'<b>{df["Название задания"][i]}</b>\n'
         f'Дата начала: <i>{df["Дата начала"][i]}</i>\n'
         f'Дата окончания: <i>{df["Дата окончания"][i]}</i>\n')
+
         if df["Дополнительная информация"][i]:
             msg += f'{df["Дополнительная информация"][i]}\n'
-        
+
         time = str(df["Время уведомления"][i])
         hour = int(time[:time.index(':')])
         minute_with_seconds = time[time.index(':')+1:]

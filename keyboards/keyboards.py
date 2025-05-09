@@ -1,3 +1,4 @@
+""" Keyboards """
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 register_keyboard = ReplyKeyboardMarkup(keyboard=[
